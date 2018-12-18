@@ -1,5 +1,10 @@
 {% extends 'base.html.twig' %}
 {% block body %}
-    <a href="register">register</a>
-    <a href="login">login</a>
+    {% if app.user %}
+        hello {{ app.user.username }}
+        <a href="logout">logout</a>
+    {% else %}
+        <a href="register">register</a>
+        <a href="login">login</a>
+    {% endif %}
 {% endblock %}
