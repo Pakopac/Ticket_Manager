@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -47,6 +49,16 @@ class User implements UserInterface
      * @ORM\Column(type="string", length=255)
      */
     private $lastname;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Tickets", mappedBy="assign_to")
+     */
+    private $tickets;
+
+    public function __construct()
+    {
+        $this->tickets = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -153,6 +165,34 @@ class User implements UserInterface
     public function setLastname(string $lastname): self
     {
         $this->lastname = $lastname;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Tickets[]
+     */
+    public function getTickets(): Collection
+    {
+        return $this->tickets;
+    }
+
+    public function addTicket(Tickets $ticket): self
+    {
+        if (!$this->tickets->contains($ticket)) {
+            $this->tickets[] = $ticket;
+            $ticket->addAssignTo($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTicket(Tickets $ticket): self
+    {
+        if ($this->tickets->contains($ticket)) {
+            $this->tickets->removeElement($ticket);
+            $ticket->removeAssignTo($this);
+        }
 
         return $this;
     }
