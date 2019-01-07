@@ -2,6 +2,7 @@
 {% block body %}
     {% if app.user %}
         hello {{ app.user.username }}
+        <a href="new_tickets">new ticket</a>
         <a href="logout">logout</a>
     {% else %}
         <a href="register">register</a>

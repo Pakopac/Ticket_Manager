@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Form\TicketsType;
 use App\Entity\Tickets;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,16 +18,18 @@ class TicketsController extends AbstractController
     {
         // 1) build the form
         $ticket = new Tickets();
+        $user = $this->getUser();
         $form = $this->createForm(TicketsType::class, $ticket);
 
         // 2) handle the submit (will only happen on POST)
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-
             // 4) save the User!
             $entityManager = $this->getDoctrine()->getManager();
+            $user->addTicket($ticket);
             $entityManager->persist($ticket);
             $entityManager->flush();
+
 
             return $this->redirectToRoute('home');
         }
