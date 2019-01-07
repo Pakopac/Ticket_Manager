@@ -38,4 +38,15 @@ class TicketsController extends AbstractController
             array('form' => $form->createView())
         );
     }
+    /**
+     * @Route("/view_tickets", name="view_tickets")
+     */
+    public function view_tickets(){
+        $repository = $this->getDoctrine()->getRepository(Tickets::class);
+        $ticket = $repository->findAll();
+        return $this->render(
+            'tickets/view_tickets.html.twig',
+            array('tickets' => $ticket)
+        );
+    }
 }
