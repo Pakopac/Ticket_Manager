@@ -1,14 +1,11 @@
 <?php
-
 namespace App\Controller;
-
 use App\Entity\User;
 use App\Form\TicketsType;
 use App\Entity\Tickets;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
-
 class TicketsController extends AbstractController
 {
     /**
@@ -20,7 +17,6 @@ class TicketsController extends AbstractController
         $ticket = new Tickets();
         $user = $this->getUser();
         $form = $this->createForm(TicketsType::class, $ticket);
-
         // 2) handle the submit (will only happen on POST)
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -29,8 +25,6 @@ class TicketsController extends AbstractController
             $user->addTicket($ticket);
             $entityManager->persist($ticket);
             $entityManager->flush();
-
-
             return $this->redirectToRoute('home');
         }
         return $this->render(
@@ -43,10 +37,17 @@ class TicketsController extends AbstractController
      */
     public function view_tickets(){
         $repository = $this->getDoctrine()->getRepository(Tickets::class);
-        $ticket = $repository->findAll();
+        $user = $this->getUser();
+        if(in_array("ROLE_ADMIN",$user->getRoles())){
+            $ticket = $repository->findAll();
+        }
+        else{
+            $ticket = $user->getTickets();
+        }
         return $this->render(
             'tickets/view_tickets.html.twig',
-            array('tickets' => $ticket)
+            array('tickets' => $ticket,
+                'user' => $user,)
         );
     }
 }
