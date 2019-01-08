@@ -2,4 +2,12 @@
 {% block body %}
     <h1>{{ ticket.title }}</h1>
     {{ ticket.content }}
+
+    <h3>message</h3>
+    {{ form_start(form) }}
+    {{ form_row(form.content) }}
+
+    <button type="submit">Create</button>
+    {{ form_end(form) }}
+
 {% endblock %}

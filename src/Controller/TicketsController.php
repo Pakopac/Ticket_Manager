@@ -1,7 +1,9 @@
 <?php
 namespace App\Controller;
+use App\Entity\Messages;
 use App\Entity\User;
 use App\Form\TicketsType;
+use App\Form\MessagesType;
 use App\Entity\Tickets;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,7 +30,7 @@ class TicketsController extends AbstractController
             return $this->redirectToRoute('home');
         }
         return $this->render(
-            'tickets/index.html.twig',
+            'tickets/new_ticket.html.twig',
             array('form' => $form->createView())
         );
     }
@@ -53,12 +55,30 @@ class TicketsController extends AbstractController
     /**
      * @Route("/ticket/{slug}", name="ticket")
      */
-    public function ticket($slug){
+    public function ticket(Request $request, $slug){
         $repository = $this->getDoctrine()->getRepository(Tickets::class);
         $ticket = $repository ->find($slug);
+
+        // 1) build the form
+        $message = new Messages();
+        $user = $this->getUser();
+        $form = $this->createForm(MessagesType::class, $message);
+        // 2) handle the submit (will only happen on POST)
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            // 4) save the User!
+            $entityManager = $this->getDoctrine()->getManager();
+            $user->addMessage($message);
+            $ticket->addMessage($message);
+            $entityManager->persist($message);
+            $entityManager->flush();
+            return $this->redirectToRoute('home');
+        }
+
         return $this->render(
             'tickets/ticket.html.twig',
-            array('ticket' => $ticket)
+            array('ticket' => $ticket,
+                'form' => $form->createView())
         );
     }
 }

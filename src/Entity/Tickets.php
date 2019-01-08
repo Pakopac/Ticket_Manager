@@ -33,9 +33,15 @@ class Tickets
      */
     private $assign_to;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Messages", mappedBy="ticket_assign")
+     */
+    private $messages;
+
     public function __construct()
     {
         $this->assign_to = new ArrayCollection();
+        $this->messages = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -88,6 +94,37 @@ class Tickets
     {
         if ($this->assign_to->contains($assignTo)) {
             $this->assign_to->removeElement($assignTo);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Messages[]
+     */
+    public function getMessages(): Collection
+    {
+        return $this->messages;
+    }
+
+    public function addMessage(Messages $message): self
+    {
+        if (!$this->messages->contains($message)) {
+            $this->messages[] = $message;
+            $message->setTicketAssign($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMessage(Messages $message): self
+    {
+        if ($this->messages->contains($message)) {
+            $this->messages->removeElement($message);
+            // set the owning side to null (unless already changed)
+            if ($message->getTicketAssign() === $this) {
+                $message->setTicketAssign(null);
+            }
         }
 
         return $this;
