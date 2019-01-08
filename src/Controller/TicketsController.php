@@ -75,7 +75,7 @@ class TicketsController extends AbstractController
             $ticket->addMessage($message);
             $entityManager->persist($message);
             $entityManager->flush();
-            return $this->redirectToRoute('home');
+            return $this->redirectToRoute('ticket', ['slug' => $slug]);
         }
 
 
