@@ -3,6 +3,8 @@
     <h1>{{ ticket.title }}</h1>
     {{ ticket.content }}
 
+    <br><a href="edit/{{ ticket.id }}">edit</a>
+
     <h2>message</h2>
 
     {% for message in messages %}
@@ -17,5 +19,11 @@
 
     <button type="submit">Create</button>
     {{ form_end(form) }}
+
+    <br>
+    {{ form_start(formAssign) }}
+    {{ form_row(formAssign.AssignTo) }}
+    <button type="submit">Create</button>
+    {{ form_end(formAssign) }}
 
 {% endblock %}

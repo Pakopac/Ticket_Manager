@@ -2,6 +2,7 @@
 namespace App\Controller;
 use App\Entity\Messages;
 use App\Entity\User;
+use App\Form\AssignToType;
 use App\Form\TicketsType;
 use App\Form\MessagesType;
 use App\Entity\Tickets;
@@ -62,6 +63,9 @@ class TicketsController extends AbstractController
         $repository_messages= $this->getDoctrine()->getRepository(Messages::class);
         $getMessages = $repository_messages->findAll();
 
+        $repository_users= $this->getDoctrine()->getRepository(User::class);
+        $getAllUsers = $repository_users->findAll();
+
         // 1) build the form
         $message = new Messages();
         $user = $this->getUser();
@@ -78,12 +82,32 @@ class TicketsController extends AbstractController
             return $this->redirectToRoute('ticket', ['slug' => $slug]);
         }
 
+        $ticketAssign = new Tickets();
+        $formAssign = $this->createForm(AssignToType::class,$ticketAssign);
+        // 2) handle the submit (will only happen on POST)
+        $formAssign->handleRequest($request);
+        if ($formAssign->isSubmitted() && $formAssign->isValid()) {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($user);
+            $entityManager->flush();
+            return $this->redirectToRoute('ticket', ['slug' => $slug]);
+        }
 
         return $this->render(
             'tickets/ticket.html.twig',
             array('ticket' => $ticket,
                 'form' => $form->createView(),
-                'messages' => $getMessages)
+                'messages' => $getMessages,
+                'users' => $getAllUsers,
+                'formAssign' => $formAssign->createView())
+        );
+    }
+    /**
+     * @Route("edit/{slug}", name="edit")
+     */
+    public function edit(){
+        return $this->render(
+            'tickets/edit.html.twig'
         );
     }
 }
