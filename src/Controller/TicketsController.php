@@ -82,13 +82,16 @@ class TicketsController extends AbstractController
             return $this->redirectToRoute('ticket', ['slug' => $slug]);
         }
 
-        $ticketAssign = new Tickets();
-        $formAssign = $this->createForm(AssignToType::class,$ticketAssign);
+        $formAssign = $this->createForm(AssignToType::class);
         // 2) handle the submit (will only happen on POST)
         $formAssign->handleRequest($request);
         if ($formAssign->isSubmitted() && $formAssign->isValid()) {
             $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($user);
+            var_dump($request->get("assign_to"));
+            $user = $this->getDoctrine()->getRepository(User::class)->findBy(['id' => $request->get("assign_to")])[0];
+            $user->addTicket($ticket);
+            //$formAssign->getData()->addTicket($ticket);
+            $entityManager->persist($ticket);
             $entityManager->flush();
             return $this->redirectToRoute('ticket', ['slug' => $slug]);
         }

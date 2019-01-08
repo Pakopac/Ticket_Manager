@@ -19,15 +19,9 @@ class AssignToType extends AbstractType
             'class' => User::class,
             'query_builder' => function (EntityRepository $er) {
                 return $er->createQueryBuilder('u')
-                    ->getUser('u.username');
+                    ->select('u');
             },
             'choice_label' => 'username',
-        ));
-    }
-    public function configureOptions(OptionsResolver $resolver)
-    {
-        $resolver->setDefaults(array(
-            'data_class' => Tickets::class,
         ));
     }
 }
