@@ -56,8 +56,11 @@ class TicketsController extends AbstractController
      * @Route("/ticket/{slug}", name="ticket")
      */
     public function ticket(Request $request, $slug){
-        $repository = $this->getDoctrine()->getRepository(Tickets::class);
-        $ticket = $repository ->find($slug);
+        $repository_tickets = $this->getDoctrine()->getRepository(Tickets::class);
+        $ticket = $repository_tickets ->find($slug);
+
+        $repository_messages= $this->getDoctrine()->getRepository(Messages::class);
+        $getMessages = $repository_messages->findAll();
 
         // 1) build the form
         $message = new Messages();
@@ -75,10 +78,12 @@ class TicketsController extends AbstractController
             return $this->redirectToRoute('home');
         }
 
+
         return $this->render(
             'tickets/ticket.html.twig',
             array('ticket' => $ticket,
-                'form' => $form->createView())
+                'form' => $form->createView(),
+                'messages' => $getMessages)
         );
     }
 }

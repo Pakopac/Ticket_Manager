@@ -3,7 +3,15 @@
     <h1>{{ ticket.title }}</h1>
     {{ ticket.content }}
 
-    <h3>message</h3>
+    <h2>message</h2>
+
+    {% for message in messages %}
+        {% if message.ticketAssign.id == ticket.id %}
+            <h3>{{ message.content }}</h3>
+            by {{ message.messageAuthor.username }}
+        {% endif %}
+    {% endfor %}
+    <br><br>
     {{ form_start(form) }}
     {{ form_row(form.content) }}
 
