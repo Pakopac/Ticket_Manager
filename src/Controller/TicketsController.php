@@ -50,4 +50,15 @@ class TicketsController extends AbstractController
                 'user' => $user,)
         );
     }
+    /**
+     * @Route("/ticket/{slug}", name="ticket")
+     */
+    public function ticket($slug){
+        $repository = $this->getDoctrine()->getRepository(Tickets::class);
+        $ticket = $repository ->find($slug);
+        return $this->render(
+            'tickets/ticket.html.twig',
+            array('ticket' => $ticket)
+        );
+    }
 }
