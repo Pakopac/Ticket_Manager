@@ -2,8 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\Messages;
 use App\Entity\Tickets;
+use App\Controller\MessagesController;
 use App\Form\TicketsType;
+use App\Form\MessagesType;
 use App\Repository\TicketsRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,10 +26,11 @@ class TicketsController extends AbstractController
         $user = $this->getUser();
         if($user) {
             if(in_array("ROLE_ADMIN",$user->getRoles())) {
-                return $this->render('tickets/index.html.twig', ['tickets' => $ticketsRepository->findAll()]);
+                return $this->render('tickets/index.html.twig',
+                    ['tickets' => $ticketsRepository->findAll()]);
             }
             else{
-                return $this->render('tickets/index.html.twig', ['tickets' => $user->getTickets()   ]);
+                return $this->render('tickets/index.html.twig', ['tickets' => $user->getTickets()]);
             }
         }
         else{
@@ -65,11 +69,31 @@ class TicketsController extends AbstractController
     }
 
     /**
-     * @Route("/{id}", name="tickets_show", methods={"GET"})
+     * @Route("/{id}", name="tickets_show", methods={"GET","POST"})
      */
-    public function show(Tickets $ticket): Response
+    public function show(Tickets $ticket, Request $request): Response
     {
-        return $this->render('tickets/show.html.twig', ['ticket' => $ticket]);
+        $repository_messages= $this->getDoctrine()->getRepository(Messages::class);
+        $getMessages = $repository_messages->findAll();
+
+        $user = $this->getUser();
+        $newMessage = new Messages();
+        $form = $this->createForm(MessagesType::class, $newMessage);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager = $this->getDoctrine()->getManager();
+            $user->addMessage($newMessage);
+            $ticket->addMessage($newMessage);
+            $entityManager->persist($newMessage);
+            $entityManager->flush();
+            $id = $ticket->getId();
+            return $this->redirectToRoute('tickets_show',['id' => $id]);
+        }
+        return $this->render('tickets/show.html.twig',
+            ['ticket' => $ticket,
+             'form' => $form->createView(),
+             'messages' => $getMessages]);
     }
 
     /**
