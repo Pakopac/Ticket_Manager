@@ -1,116 +1,108 @@
 <?php
+
 namespace App\Controller;
-use App\Entity\Messages;
-use App\Entity\User;
-use App\Form\AssignToType;
-use App\Form\TicketsType;
-use App\Form\MessagesType;
+
 use App\Entity\Tickets;
-use Symfony\Component\HttpFoundation\Request;
+use App\Form\TicketsType;
+use App\Repository\TicketsRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+
+/**
+ * @Route("/tickets")
+ */
 class TicketsController extends AbstractController
 {
     /**
-     * @Route("/new_tickets", name="new_tickets")
+     * @Route("/", name="tickets_index", methods={"GET"})
      */
-    public function new_tickets(Request $request)
+    public function index(TicketsRepository $ticketsRepository): Response
     {
-        // 1) build the form
-        $ticket = new Tickets();
         $user = $this->getUser();
-        $form = $this->createForm(TicketsType::class, $ticket);
-        // 2) handle the submit (will only happen on POST)
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            // 4) save the User!
-            $entityManager = $this->getDoctrine()->getManager();
-            $user->addTicket($ticket);
-            $entityManager->persist($ticket);
-            $entityManager->flush();
-            return $this->redirectToRoute('home');
-        }
-        return $this->render(
-            'tickets/new_ticket.html.twig',
-            array('form' => $form->createView())
-        );
-    }
-    /**
-     * @Route("/view_tickets", name="view_tickets")
-     */
-    public function view_tickets(){
-        $repository = $this->getDoctrine()->getRepository(Tickets::class);
-        $user = $this->getUser();
-        if(in_array("ROLE_ADMIN",$user->getRoles())){
-            $ticket = $repository->findAll();
+        if($user) {
+            if(in_array("ROLE_ADMIN",$user->getRoles())) {
+                return $this->render('tickets/index.html.twig', ['tickets' => $ticketsRepository->findAll()]);
+            }
+            else{
+                return $this->render('tickets/index.html.twig', ['tickets' => $user->getTickets()   ]);
+            }
         }
         else{
-            $ticket = $user->getTickets();
+            return $this->redirectToRoute('home');
         }
-        return $this->render(
-            'tickets/view_tickets.html.twig',
-            array('tickets' => $ticket,
-                'user' => $user,)
-        );
     }
+
     /**
-     * @Route("/ticket/{slug}", name="ticket")
+     * @Route("/new", name="tickets_new", methods={"GET","POST"})
      */
-    public function ticket(Request $request, $slug){
-        $repository_tickets = $this->getDoctrine()->getRepository(Tickets::class);
-        $ticket = $repository_tickets ->find($slug);
-
-        $repository_messages= $this->getDoctrine()->getRepository(Messages::class);
-        $getMessages = $repository_messages->findAll();
-
-        $repository_users= $this->getDoctrine()->getRepository(User::class);
-        $getAllUsers = $repository_users->findAll();
-
-        // 1) build the form
-        $message = new Messages();
+    public function new(Request $request): Response
+    {
         $user = $this->getUser();
-        $form = $this->createForm(MessagesType::class, $message);
-        // 2) handle the submit (will only happen on POST)
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            // 4) save the User!
-            $entityManager = $this->getDoctrine()->getManager();
-            $user->addMessage($message);
-            $ticket->addMessage($message);
-            $entityManager->persist($message);
-            $entityManager->flush();
-            return $this->redirectToRoute('ticket', ['slug' => $slug]);
-        }
+        if($user) {
+            $ticket = new Tickets();
+            $form = $this->createForm(TicketsType::class, $ticket);
+            $form->handleRequest($request);
 
-        $formAssign = $this->createForm(AssignToType::class);
-        // 2) handle the submit (will only happen on POST)
-        $formAssign->handleRequest($request);
-        if ($formAssign->isSubmitted() && $formAssign->isValid()) {
-            $entityManager = $this->getDoctrine()->getManager();
-            var_dump($request->get("assign_to"));
-            $user = $this->getDoctrine()->getRepository(User::class)->findBy(['id' => $request->get("assign_to")])[0];
-            $user->addTicket($ticket);
-            //$formAssign->getData()->addTicket($ticket);
-            $entityManager->persist($ticket);
-            $entityManager->flush();
-            return $this->redirectToRoute('ticket', ['slug' => $slug]);
-        }
+            if ($form->isSubmitted() && $form->isValid()) {
+                $entityManager = $this->getDoctrine()->getManager();
+                $user->addTicket($ticket);
+                $entityManager->persist($ticket);
+                $entityManager->flush();
 
-        return $this->render(
-            'tickets/ticket.html.twig',
-            array('ticket' => $ticket,
+                return $this->redirectToRoute('tickets_index');
+            }
+
+            return $this->render('tickets/new.html.twig', [
+                'ticket' => $ticket,
                 'form' => $form->createView(),
-                'messages' => $getMessages,
-                'users' => $getAllUsers,
-                'formAssign' => $formAssign->createView())
-        );
+            ]);
+        }
+        else{
+            return $this->redirectToRoute('home');
+        }
     }
+
     /**
-     * @Route("edit/{slug}", name="edit")
+     * @Route("/{id}", name="tickets_show", methods={"GET"})
      */
-    public function edit(){
-        return $this->render(
-            'tickets/edit.html.twig'
-        );
+    public function show(Tickets $ticket): Response
+    {
+        return $this->render('tickets/show.html.twig', ['ticket' => $ticket]);
+    }
+
+    /**
+     * @Route("/{id}/edit", name="tickets_edit", methods={"GET","POST"})
+     */
+    public function edit(Request $request, Tickets $ticket): Response
+    {
+        $form = $this->createForm(TicketsType::class, $ticket);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->getDoctrine()->getManager()->flush();
+
+            return $this->redirectToRoute('tickets_index', ['id' => $ticket->getId()]);
+        }
+
+        return $this->render('tickets/edit.html.twig', [
+            'ticket' => $ticket,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/{id}", name="tickets_delete", methods={"DELETE"})
+     */
+    public function delete(Request $request, Tickets $ticket): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$ticket->getId(), $request->request->get('_token'))) {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->remove($ticket);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('tickets_index');
     }
 }
