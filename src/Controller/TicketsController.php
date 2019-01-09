@@ -123,6 +123,9 @@ class TicketsController extends AbstractController
     {
         if ($this->isCsrfTokenValid('delete'.$ticket->getId(), $request->request->get('_token'))) {
             $entityManager = $this->getDoctrine()->getManager();
+            foreach ($ticket->getMessages() as $message) {
+                $entityManager->remove($message);
+            }
             $entityManager->remove($ticket);
             $entityManager->flush();
         }
