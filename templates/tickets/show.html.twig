@@ -11,7 +11,6 @@
 
     {% if admin %}
     <div class="d-flex justify-content-start btn-article">
-        <a href="{{ path('tickets_edit', {'id': ticket.id}) }}"><button class="btn btn-warning edit-button">Edit</button></a>
         {{ include('tickets/_delete_form.html.twig') }}
     </div>
     {% endif %}
@@ -21,8 +20,8 @@
         <h2>Messages</h2>
 
     {% for message in messages %}
-        <hr>
         {% if message.ticketAssign.id == ticket.id %}
+            <hr>
             <h3>{{ message.content }}</h3>
             by {{ message.messageAuthor.username }}
 
