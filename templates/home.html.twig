@@ -2,11 +2,7 @@
 {% block body %}
     {% if app.user %}
         hello {{ app.user.username }}
-        <a href="/tickets/new">new ticket</a>
-        <a href="/tickets">view tickets</a>
-        <a href="logout">logout</a>
     {% else %}
-        <a href="register">register</a>
-        <a href="login">login</a>
+        hello, this is the home page please login to view your tickets
     {% endif %}
 {% endblock %}

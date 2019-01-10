@@ -12,8 +12,11 @@ class MainController extends AbstractController
      */
     public function register(Request $request)
     {
-        return $this->render(
-            'home.html.twig'
-            );
+        if($this->getUser()){
+            return $this->redirectToRoute('tickets_index');
+        }
+        else{
+            return $this->render('home.html.twig');
+        }
     }
 }
