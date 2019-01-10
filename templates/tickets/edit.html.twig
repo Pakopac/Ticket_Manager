@@ -10,4 +10,7 @@
     <a href="{{ path('tickets_index') }}">back to list</a>
 
     {{ include('tickets/_delete_form.html.twig') }}
+    {{ form_start(formAssignTo) }}
+    <button type="submit">assign</button>
+    {{ form_end(formAssignTo) }}
 {% endblock %}

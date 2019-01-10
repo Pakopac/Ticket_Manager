@@ -24,9 +24,10 @@
 
     <a href="{{ path('tickets_index') }}">back to list</a>
 
+    {% if admin %}
     <a href="{{ path('tickets_edit', {'id': ticket.id}) }}">edit</a>
-
     {{ include('tickets/_delete_form.html.twig') }}
+    {% endif %}
 
     <h2>message</h2>
 
@@ -34,8 +35,12 @@
         {% if message.ticketAssign.id == ticket.id %}
             <h3>{{ message.content }}</h3>
             by {{ message.messageAuthor.username }}
-            <a href="{{ path('messages_edit', {'id': message.id}) }}">edit</a>
-            {{ include('messages/_delete_form.html.twig') }}
+
+            {% if admin %}
+                <a href="{{ path('messages_edit', {'id': message.id}) }}">edit</a>
+                {{ include('messages/_delete_form.html.twig') }}
+            {% endif %}
+
         {% endif %}
     {% endfor %}
     {{ include('messages/_form.html.twig') }}

@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Messages;
 use App\Entity\Tickets;
+use App\Entity\User;
 use App\Controller\MessagesController;
+use App\Form\AssignToType;
 use App\Form\TicketsType;
 use App\Form\MessagesType;
 use App\Repository\TicketsRepository;
@@ -27,10 +29,12 @@ class TicketsController extends AbstractController
         if($user) {
             if(in_array("ROLE_ADMIN",$user->getRoles())) {
                 return $this->render('tickets/index.html.twig',
-                    ['tickets' => $ticketsRepository->findAll()]);
+                    ['tickets' => $ticketsRepository->findAll(),
+                     'admin' => true]);
             }
             else{
-                return $this->render('tickets/index.html.twig', ['tickets' => $user->getTickets()]);
+                return $this->render('tickets/index.html.twig', ['tickets' => $user->getTickets(),
+                                                                      'admin' => false]);
             }
         }
         else{
@@ -90,10 +94,17 @@ class TicketsController extends AbstractController
             $id = $ticket->getId();
             return $this->redirectToRoute('tickets_show',['id' => $id]);
         }
+        if(in_array("ROLE_ADMIN",$user->getRoles())) {
+            $isadmin = true;
+        }
+        else{
+            $isadmin = false;
+        }
         return $this->render('tickets/show.html.twig',
             ['ticket' => $ticket,
              'form' => $form->createView(),
-             'messages' => $getMessages]);
+             'messages' => $getMessages,
+                'admin' => $isadmin]);
     }
 
     /**
@@ -101,19 +112,38 @@ class TicketsController extends AbstractController
      */
     public function edit(Request $request, Tickets $ticket): Response
     {
-        $form = $this->createForm(TicketsType::class, $ticket);
-        $form->handleRequest($request);
+        $user = $this->getUser();
+        if(in_array("ROLE_ADMIN",$user->getRoles())) {
+            $form = $this->createForm(TicketsType::class, $ticket);
+            $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            if ($form->isSubmitted() && $form->isValid()) {
+                $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute('tickets_index', ['id' => $ticket->getId()]);
+                return $this->redirectToRoute('tickets_index', ['id' => $ticket->getId()]);
+            }
+
+            $formAssignTo = $this->createForm(AssignToType::class);
+            $formAssignTo->handleRequest($request);
+
+            if ($formAssignTo->isSubmitted() && $formAssignTo->isValid()) {
+                $entityManager = $this->getDoctrine()->getManager();
+                $user = $this->getDoctrine()->getRepository(User::class)->findBy(['id' => $request->get("assign_to")])[0];
+                $user->addTicket($ticket);
+                $entityManager->persist($ticket);
+                $entityManager->flush();
+                return $this->redirectToRoute('tickets_index', ['id' => $ticket->getId()]);
+            }
+
+            return $this->render('tickets/edit.html.twig', [
+                'ticket' => $ticket,
+                'form' => $form->createView(),
+                'formAssignTo' => $formAssignTo->createView()
+            ]);
         }
-
-        return $this->render('tickets/edit.html.twig', [
-            'ticket' => $ticket,
-            'form' => $form->createView(),
-        ]);
+        else{
+            return $this->redirectToRoute('tickets_index');
+        }
     }
 
     /**
