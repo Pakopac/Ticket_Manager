@@ -1,4 +1,11 @@
 {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+    <label for="tickets_title">Title</label>
+    <div class="form-group">
+        {{ form_widget(form.title, { 'attr': {'class': 'form-control'} }) }}
+    </div>
+    <label for="tickets_content">Content</label>
+    <div class="form-group">
+        {{ form_widget(form.content, { 'attr': {'class': 'form-control'} }) }}
+    </div>
+    <button class="btn btn-success">{{ button_label|default('Save') }}</button>
 {{ form_end(form) }}

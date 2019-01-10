@@ -1,8 +1,6 @@
 {% extends 'base.html.twig' %}
 {% block body %}
-    {% if app.user %}
-        hello {{ app.user.username }}
-    {% else %}
-        hello, this is the home page please login to view your tickets
+    {% if not(app.user) %}
+        <h2><p>hello, this is the home page please login to create or view your tickets.</p></h2>
     {% endif %}
 {% endblock %}

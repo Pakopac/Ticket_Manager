@@ -1,0 +1,3 @@
+form:not(.form-delete){
+    padding: 10px;
+}

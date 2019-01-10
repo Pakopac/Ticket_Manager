@@ -2,15 +2,24 @@
 
 {% block title %}Register{% endblock %}
 {% block body %}
-    <form>
+    <h1 class="h3 mb-3 font-weight-normal">Register</h1>
 {{ form_start(form) }}
-    {{ form_row(form.username) }}
-    {{ form_row(form.password) }}
-    {{ form_row(form.email) }}
-    {{ form_row(form.firstname) }}
-    {{ form_row(form.lastname) }}
-    </form>
+    <div class="form-group">
+    {{ form_row(form.username, { 'attr': {'class': 'form-control'} }) }}
+    </div>
+    <div class="form-group">
+        {{ form_row(form.password, { 'attr': {'class': 'form-control'} }) }}
+    </div>
+    <div class="form-group">
+        {{ form_row(form.email, { 'attr': {'class': 'form-control'} }) }}
+    </div>
+    <div class="form-group">
+        {{ form_row(form.firstname, { 'attr': {'class': 'form-control'} }) }}
+    </div>
+    <div class="form-group">
+        {{ form_row(form.lastname, { 'attr': {'class': 'form-control'} }) }}
+    </div>
 
-<button type="submit">Register!</button>
+<button type="submit" class="btn btn-primary">Register !</button>
 {{ form_end(form) }}
 {% endblock %}

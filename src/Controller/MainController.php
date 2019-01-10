@@ -16,7 +16,7 @@ class MainController extends AbstractController
             return $this->redirectToRoute('tickets_index');
         }
         else{
-            return $this->render('home.html.twig');
+            return $this->redirectToRoute('app_login');
         }
     }
 }

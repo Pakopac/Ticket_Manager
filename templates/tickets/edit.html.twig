@@ -4,13 +4,28 @@
 
 {% block body %}
     <h1>Edit Tickets</h1>
+        {{ form_start(form) }}
+        <label for="tickets_title">Title</label>
+        <div class="form-group">
+            {{ form_widget(form.title, { 'attr': {'class': 'form-control'} }) }}
+        </div>
+        <label for="tickets_content">Content</label>
+        <div class="form-group">
+            {{ form_widget(form.content, { 'attr': {'class': 'form-control'} }) }}
+        </div>
+    <div class="d-flex justify-content-start">
+        <button class="btn btn-warning" style="margin-right: 10px">{{ button_label|default('Update') }}</button>
+        {{ form_end(form) }}
+        {{ include('tickets/_delete_form.html.twig') }}
+    </div>
 
-    {{ include('tickets/_form.html.twig', {'button_label': 'Update'}) }}
+    {{ form_start(formAssignTo) }}
+    <h3>Assign ticket to user</h3>
+    <div class="form-group">
+        {{ form_widget(formAssignTo.users,{ 'attr': {'class': 'form-control'} })}}
+    </div>
+    <button class="btn btn-success" type="submit">Assign</button>
+    {{ form_end(formAssignTo) }}
 
     <a href="{{ path('tickets_index') }}">back to list</a>
-
-    {{ include('tickets/_delete_form.html.twig') }}
-    {{ form_start(formAssignTo) }}
-    <button type="submit">assign</button>
-    {{ form_end(formAssignTo) }}
 {% endblock %}
